@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package test_project;
+
+go_package 
+
+service Auth{
+    rpc RegisterUser(RegisterRequest) returns (RegisterResp);
+    rpc LoginUser(LoginRequest) returns (LoginResp);
+}
+
+message RegisterRequest{
+    string email = 1;
+    string password = 2;
+}
+
+message RegisterResp{
+    string user_id = 1;
+}
+
+message LoginRequest{
+    string email = 1;
+    string password = 2;
+}
+
+message LoginResp{
+    string token = 1;
+}
