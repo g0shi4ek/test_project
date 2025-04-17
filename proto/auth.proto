@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto_files;
 
-option go_package = "github.com/g0shi4ek/test_project;protobuf";
+option go_package = "github.com/g0shi4ek/test_project/gen/go;gen";
 
 service Auth{
     rpc RegisterUser(RegisterRequest) returns (RegisterResp);
