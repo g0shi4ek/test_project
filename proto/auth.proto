@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package test_project;
+package proto_files;
 
-go_package 
+option go_package = "github.com/g0shi4ek/test_project;protobuf";
 
 service Auth{
     rpc RegisterUser(RegisterRequest) returns (RegisterResp);
