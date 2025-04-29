@@ -7,37 +7,37 @@ import (
 
 	"github.com/g0shi4ek/test_project/config"
 	pb "github.com/g0shi4ek/test_project/gen/go"
-	"github.com/g0shi4ek/test_project/internal/adapter/database"
 	"github.com/g0shi4ek/test_project/internal/repository"
 	"github.com/g0shi4ek/test_project/internal/service"
+	"github.com/g0shi4ek/test_project/pkg/database"
+	"github.com/go-redis/redis"
 	"google.golang.org/grpc"
 )
 
-func NewAuthServer(ctx context.Context, cfg *config.Config) error{
-	listener, err := net.Listen("tcp", cfg.AuthPort)
+func NewAuthServer(cache * redis.Client,  ctx context.Context, cfg *config.Config) error {
+	listener, err := net.Listen("tcp", ":"+cfg.AuthPort)
 	if err != nil {
-		log.Printf("failed to listen, %v", err)
+		log.Printf("Failed to listen, %v", err)
 		return err
 	}
-	grcpServer := grpc.NewServer()
+	grpcServer := grpc.NewServer()
 
 	db, err := database.NewUserPool(context.Background(), cfg)
 	if err != nil {
-		log.Printf("failed to create pool, %v", err)
+		log.Printf("Failed to create pool, %v", err)
 		return err
 	}
 	defer db.Close()
 
 	authRepo := repository.NewUserRepository(db)
-	authService := service.NewAuthUseCases(pb.UnimplementedAuthServer{}, authRepo, cfg)
+	authService := service.NewAuthService(authRepo, cfg)
 
-	pb.RegisterAuthServer(grcpServer, &authService.Service)
+	pb.RegisterAuthServer(grpcServer, authService)
 
-	err = grcpServer.Serve(listener)
-	if err != nil {
-		log.Printf("Error starting server, %v", err)
-		return err
+	log.Printf("Server is listening on port %s...", cfg.AuthPort)
+	if err := grpcServer.Serve(listener); err != nil {
+		log.Printf("Server dropped with error: %v", err)
 	}
-	log.Printf("gRPC server start, port: %s", cfg.AuthPort)
+
 	return nil
 }
